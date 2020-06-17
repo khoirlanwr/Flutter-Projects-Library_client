@@ -2,15 +2,29 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:library_client/model/model_user_login.dart';
+import 'package:library_client/model/response_peminjaman_ongoing.dart';
 import 'package:library_client/model/response_post.dart';
 import 'package:library_client/model/response_create_viewId.dart';
 import 'package:library_client/model/response_get_data_id.dart';
 import 'package:library_client/model/response_post_user.dart';
+import 'package:library_client/model/response_post_peminjaman.dart';
+import 'package:library_client/model/response_riwayat_peminjaman.dart';
+import 'package:library_client/model/response_list_kategori.dart';
+import 'package:library_client/model/response_kategori.dart';
 
 class ApiService {
 
   static final String _url = 'http://192.168.43.119:6996/perpustakaan/api/v1/data_buku';
   static final String _userURI = 'http://192.168.43.119:6996/perpustakaan/api/v1/data_mhs';
+  static final String _urlPeminjaman = 'http://192.168.43.119:6996/perpustakaan/api/v1/peminjaman';
+  static final String _urlKategori = 'http://192.168.43.119:6996/perpustakaan/api/v1/kategori';
+
+
+  static String timeParser(String time) {
+    String timeSubString1 = time.substring(0, 17);
+    String timeFinal = timeSubString1 + "00Z";
+    return timeFinal;
+  }
 
   static Future<List<Record>> getDataBuku(int pageNumber, int bookSize) async {    
     List<Record> records = []; 
@@ -21,23 +35,91 @@ class ApiService {
 
 
     if(response.statusCode == 200) {
-      // print('response.statusCode is 200');
-      // get pure json
       final json = jsonDecode(response.body);
-      // print(json);
-      // convert to model
       ResponsePost responsePost = ResponsePost.fromJson(json);
-      // add to records
       responsePost.data.records.forEach((value){
         records.add(value);  
       });
 
+      print(records.length);
       return records;
     } else {
       return [];
     }
   }
 
+
+  // Edited for search by judul buku
+  static Future<List<Record>> searchBookByTitle(String keywords, int pageNumber, int bookSize) async {
+    List<Record> records = [];
+    Map data = {
+      'search': keywords,
+      'page': pageNumber.toString(),
+      'size': bookSize.toString()
+    };
+
+    String bodyJson = json.encode(data);
+    final response = await http.post('$_url/list', body: bodyJson);
+
+    if (response.statusCode == 200) {
+      print('status code == 200');
+      final json = jsonDecode(response.body);
+      print(json);
+      
+      ResponsePost responsePost = ResponsePost.fromJson(json);
+      // ResponseSearchBook responseSearchBook = ResponseSearchBook.fromJson(json);
+      
+      // tambahkan setiap data hasil search ke records;
+      responsePost.data.records.forEach((value) {
+        print(value.judul);
+        records.add(value);
+      });
+
+      print(records.length);
+      return records;
+
+    } else {
+      print('status code != 200');
+      return [];
+    }
+  }
+
+  // Edited: for post data pinjam buku ke mariaDB
+  static Future<ResponsePostPeminjaman> postPeminjamanBuku(String idBuku, String idMhs) async {
+    
+    String timeBorrowedBook = DateTime.now().toIso8601String();
+    timeBorrowedBook = timeParser(timeBorrowedBook);    
+
+    var now = new DateTime.now();
+    var timeReturnedBook = now.add(new Duration(days: 7));
+    String timeReturnedBooks = timeParser(timeReturnedBook.toIso8601String());
+
+    Map data = {
+      'id_buku': idBuku,
+      'id_mhs': idMhs,
+      'tanggal_peminjaman': timeBorrowedBook,
+      'tanggal_pengembalian': timeReturnedBooks      
+    };
+
+    print(data['tanggal_peminjaman']);
+    print(data['tanggal_pengembalian']);
+
+
+    String bodyJson = json.encode(data);
+    final response = await http.post('$_urlPeminjaman/pinjam', body: bodyJson);
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      print(json);
+      ResponsePostPeminjaman responsePostPeminjaman = ResponsePostPeminjaman.fromJson(json);
+
+      return responsePostPeminjaman;
+    } else {
+      return null;
+    }   
+  }
+
+  // Edited: for post data buku
   Future<ResponseCreateViewId> createRecord(String nama, String pengarang, String penerbit, String tahun, String stok) async {
     Map data = {
       'nama': nama,
@@ -73,7 +155,7 @@ class ApiService {
       // convert to model space
       ResponseGetDataId responseGetDataId = ResponseGetDataId.fromJson(json);
 
-      // print(responseGetDataId.data.nama);
+      print(responseGetDataId.data.judul);
 
       return responseGetDataId;
 
@@ -101,22 +183,143 @@ class ApiService {
     }
   }
 
+  // Fungsi login user mahasiswa
   Future<ResponseUserLogin> loginUser(String username, String password) async {
     Map data = {
       'mhs_id': username,
       'password': password,
     };
 
-    String bodyJson = json.encode(data);
+    String bodyJson = json.encode(data) ;
     final response = await http.post('$_userURI/login', body: bodyJson);
     
     if(response.statusCode == 200) {
+      print("Status koneksi loginUser == 200");
       final json = jsonDecode(response.body);      
       ResponseUserLogin responseUserLogin = ResponseUserLogin.fromJson(json);      
-      // print(responseUserLogin.status);
+      print(responseUserLogin.status);
       return responseUserLogin;
     } else {
+      print('data tidak ditemukan');
       return null;
     }
   }
+
+  // Fungsi untuk melihat daftar buku yang sedang dipinjam
+  static Future<List<RecordOnGoing>> peminjamanOnGoing(String idMhs) async {
+    
+    List<RecordOnGoing> records = [];
+    Map data = {
+      "id": idMhs,
+      "page": "1",
+      "size": "5"
+    };
+
+    var bodyJson = jsonEncode(data);
+    final response = await http.post('$_urlPeminjaman/berlangsung',
+    headers: {"Content-type": "application/json"}, 
+    body: bodyJson);
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      // print('json: ');
+      print(json);
+
+      ResponsePeminjamanOnGoing responsePost = ResponsePeminjamanOnGoing.fromJson(json);
+
+      responsePost.data.records.forEach((value){
+        records.add(value);
+      });
+
+      return records;      
+    } else {
+      return [];
+    }
+  }
+
+  // Fungsi untuk melihat daftar buku yang sudah selesai dikembalikan
+  static Future<List<RecordRiwayatPeminjaman>> peminjamanRiwayat(String idMahasiswa) async {
+    List<RecordRiwayatPeminjaman> records = [];
+    Map data = {
+      "id": idMahasiswa,
+      "page": "1",
+      "size": "5"
+    };
+
+    var bodyJson = jsonEncode(data);
+    final response = await http.post('$_urlPeminjaman/riwayat',
+    headers: {"Content-type": "application/json"}, 
+    body: bodyJson);
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      
+      print(json);
+
+      ResponseRiwayatPeminjaman responseRiwayatPeminjaman = ResponseRiwayatPeminjaman.fromJson(json);
+
+      responseRiwayatPeminjaman.data.records.forEach((value) {
+        records.add(value);
+      });
+
+
+      return records;
+    } else {
+      return [];
+    }
+  } 
+
+  // Edited for: return list of kategori buku
+  static Future<List<Datum>> listKategori() async {
+    
+    List<Datum> records = [];
+    final response = await http.get('$_urlKategori/list');
+
+    if (response.statusCode == 200) {
+      
+      final json = jsonDecode(response.body);
+      ResponseListKategori responseListKategori = ResponseListKategori.fromJson(json);
+
+      responseListKategori.data.forEach((value){
+        records.add(value);
+      });
+
+      return records;
+
+    } else {
+      return [];
+    }
+
+  }   
+
+
+  // Edited for melihat data buku dalam kategori
+  static Future<List<RecordKategori>> getDataBukuKategori(String kategori, String namaBuku, int pageNumber, int bookSize) async {    
+    List<RecordKategori> records = []; 
+    Map data = {
+      'category': kategori,
+      'search': namaBuku,
+      'page': pageNumber.toString(),
+      'size': bookSize.toString()
+    };
+    String bodyJson = jsonEncode(data);
+    final response = await http.post('$_url/list', body: bodyJson);
+
+    if(response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      print(json);
+      ResponseKategori responseKategori = ResponseKategori.fromJson(json);
+      // ResponsePost responsePost = ResponsePost.fromJson(json);
+      responseKategori.data.records.forEach((value){
+        records.add(value);  
+      });
+
+      // print(records.length);
+      return records;
+    } else {
+      return [];
+    }
+  }
+
+
 }

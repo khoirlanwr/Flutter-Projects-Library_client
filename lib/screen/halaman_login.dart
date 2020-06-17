@@ -173,7 +173,7 @@ class _HalamanLoginState extends State<HalamanLogin>
         autofocus: false,
         decoration: new InputDecoration(
           hintText: 'username',
-          icon: new Icon(Icons.person, color: Colors.indigoAccent),
+          icon: new Icon(Icons.person, color: Color(0xFF1E90FF)),
         ),
         validator: (value) => value.isEmpty ? 'username can\'t be empty': null,
         onSaved: (value) => _username = value,
@@ -190,7 +190,7 @@ class _HalamanLoginState extends State<HalamanLogin>
         obscureText: true,
         decoration: new InputDecoration(
           hintText: 'password',
-          icon: new Icon(Icons.lock, color: Colors.indigoAccent)
+          icon: new Icon(Icons.lock, color: Color(0xFF1E90FF)),
         ),
         validator: (value) => value.isEmpty ? 'password can\'t be empty':null,
         onSaved: (value) => _password = value,
@@ -209,7 +209,7 @@ class _HalamanLoginState extends State<HalamanLogin>
           shape: new RoundedRectangleBorder(
             borderRadius: new BorderRadius.circular(sizeConfig.getBlockHorizontal(5))
           ),
-          color: Colors.indigoAccent,
+          color: Color(0xFF1E90FF),
           child: new Text('login',
             style: new TextStyle(fontSize: sizeConfig.getBlockHorizontal(5), color: Colors.white)),
         ),

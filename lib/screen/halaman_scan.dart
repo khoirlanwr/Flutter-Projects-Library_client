@@ -29,7 +29,6 @@ class _ScanScreenState extends State<ScanScreen> {
       print(user.data.nama);
     });
     
-    // print('');
   }
 
   Widget topBar(BuildContext context) {
@@ -82,14 +81,14 @@ class _ScanScreenState extends State<ScanScreen> {
               padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 1.0),
               child: 
                 InkWell(
-                  splashColor: Colors.indigoAccent,
+                  splashColor: Color(0xFF1E90FF),
                   borderRadius: BorderRadius.circular(10.0),
                   child: Container(                    
                     width: sizeConfig.getBlockHorizontal(80),
                     height: sizeConfig.getBlockVertical(7),
                     padding: EdgeInsets.symmetric(vertical: sizeConfig.getBlockVertical(0), horizontal: sizeConfig.getBlockHorizontal(20)),
                     decoration: BoxDecoration(
-                      color: Colors.indigoAccent,
+                      color: Color(0xFF1E90FF),
                       borderRadius: BorderRadius.circular(20)
                     ),
                     child: ListTile(
@@ -109,7 +108,6 @@ class _ScanScreenState extends State<ScanScreen> {
 
   Future scan() async {
     barcode = await scanner.scan();
-    barcode = '20a63f88bab718ef28ad6859fadfe4b9';
     Navigator.push(context, 
       MaterialPageRoute(builder: (context) => HalamanPinjam(bukuId: barcode, user: widget.user)));
   }

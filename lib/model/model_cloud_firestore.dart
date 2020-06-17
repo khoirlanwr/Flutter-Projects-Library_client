@@ -6,7 +6,7 @@ class Cloud {
   // create database reference
   final _db = Firestore.instance;
 
-  void storeToCloud(String idBuku, String namaBuku, String namaMhs, String deviceToken) async {
+  void storeToCloud(String idBuku, String idMhs, String namaBuku, String namaMhs, String deviceToken) async {
     if (deviceToken != null) {
       
       // random for doc id
@@ -19,11 +19,12 @@ class Cloud {
 
       // specific
       await _borrowedBooks.setData({
-        "idBuku"  :idBuku,
-        "namaBuku":namaBuku,
-        "namaMhs" :namaMhs,
-        "deviceToken":deviceToken,
-        "createdAt": FieldValue.serverTimestamp() 
+        "idBuku" : idBuku,
+        "idMhs" : idMhs,
+        "namaBuku" : namaBuku,
+        "namaMhs" : namaMhs,
+        "deviceToken" : deviceToken,
+        "createdAt" : FieldValue.serverTimestamp() 
       });
     }    
   }

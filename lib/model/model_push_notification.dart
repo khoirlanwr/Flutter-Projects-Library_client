@@ -20,6 +20,7 @@ class Fcm {
         // simpan data yang kedua
         if (_i%2 == 0) {
           print('title: $message');
+          // Alert(context: context, title: "RFLUTTER", desc: "Flutter is awesome.").show();       
         }
         _i++;
       },

@@ -77,6 +77,7 @@ class _HalamanRootState extends State<HalamanRoot>
         break;
 
       case AuthState.NOT_DETERMINED:
+        print('waitingssss ...');
         return buildWaitingScreen();
         break;
 

@@ -9,15 +9,15 @@ ResponseGetDataId responseGetDataIdFromJson(String str) => ResponseGetDataId.fro
 String responseGetDataIdToJson(ResponseGetDataId data) => json.encode(data.toJson());
 
 class ResponseGetDataId {
-    bool status;
-    Data data;
-    String message;
-
     ResponseGetDataId({
         this.status,
         this.data,
         this.message,
     });
+
+    bool status;
+    Data data;
+    String message;
 
     factory ResponseGetDataId.fromJson(Map<String, dynamic> json) => ResponseGetDataId(
         status: json["status"],
@@ -33,40 +33,52 @@ class ResponseGetDataId {
 }
 
 class Data {
-    String bukuId;
-    String nama;
-    String pengarang;
-    String penerbit;
-    String tahun;
-    DateTime tanggalDitambahkan;
-    int stok;
-
     Data({
         this.bukuId,
-        this.nama,
-        this.pengarang,
+        this.judul,
+        this.penulis,
         this.penerbit,
-        this.tahun,
+        this.jumlahEksemplar,
+        this.kategori,
+        this.letakBuku,
+        this.gambar,
         this.tanggalDitambahkan,
         this.stok,
     });
 
+    String bukuId;
+    String judul;
+    String penulis;
+    String penerbit;
+    String jumlahEksemplar;
+    String kategori;
+    String letakBuku;
+    String gambar;
+    DateTime tanggalDitambahkan;
+    int stok;
+
     factory Data.fromJson(Map<String, dynamic> json) => Data(
         bukuId: json["buku_id"],
-        nama: json["nama"],
-        pengarang: json["pengarang"],
+        judul: json["judul"],
+        penulis: json["penulis"],
         penerbit: json["penerbit"],
-        tahun: json["tahun"],
+        jumlahEksemplar: json["jumlah_eksemplar"],
+        kategori: json["kategori"],
+        letakBuku: json["letak_buku"],
+        gambar: json["gambar"],
         tanggalDitambahkan: DateTime.parse(json["tanggal_ditambahkan"]),
         stok: json["stok"],
     );
 
     Map<String, dynamic> toJson() => {
         "buku_id": bukuId,
-        "nama": nama,
-        "pengarang": pengarang,
+        "judul": judul,
+        "penulis": penulis,
         "penerbit": penerbit,
-        "tahun": tahun,
+        "jumlah_eksemplar": jumlahEksemplar,
+        "kategori": kategori,
+        "letak_buku": letakBuku,
+        "gambar": gambar,
         "tanggal_ditambahkan": tanggalDitambahkan.toIso8601String(),
         "stok": stok,
     };

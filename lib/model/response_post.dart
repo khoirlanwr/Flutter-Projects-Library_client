@@ -9,15 +9,15 @@ ResponsePost responsePostFromJson(String str) => ResponsePost.fromJson(json.deco
 String responsePostToJson(ResponsePost data) => json.encode(data.toJson());
 
 class ResponsePost {
-    bool status;
-    Data data;
-    String message;
-
     ResponsePost({
         this.status,
         this.data,
         this.message,
     });
+
+    bool status;
+    Data data;
+    String message;
 
     factory ResponsePost.fromJson(Map<String, dynamic> json) => ResponsePost(
         status: json["status"],
@@ -33,15 +33,6 @@ class ResponsePost {
 }
 
 class Data {
-    int totalRecord;
-    int totalPage;
-    List<Record> records;
-    int offset;
-    int limit;
-    int page;
-    int prevPage;
-    int nextPage;
-
     Data({
         this.totalRecord,
         this.totalPage,
@@ -52,6 +43,15 @@ class Data {
         this.prevPage,
         this.nextPage,
     });
+
+    int totalRecord;
+    int totalPage;
+    List<Record> records;
+    int offset;
+    int limit;
+    int page;
+    int prevPage;
+    int nextPage;
 
     factory Data.fromJson(Map<String, dynamic> json) => Data(
         totalRecord: json["total_record"],
@@ -77,40 +77,52 @@ class Data {
 }
 
 class Record {
-    String bukuId;
-    String nama;
-    String pengarang;
-    String penerbit;
-    String tahun;
-    DateTime tanggalDitambahkan;
-    int stok;
-
     Record({
         this.bukuId,
-        this.nama,
-        this.pengarang,
+        this.judul,
+        this.penulis,
         this.penerbit,
-        this.tahun,
+        this.jumlahEksemplar,
+        this.kategori,
+        this.letakBuku,
+        this.gambar,
         this.tanggalDitambahkan,
         this.stok,
     });
 
+    String bukuId;
+    String judul;
+    String penulis;
+    String penerbit;
+    String jumlahEksemplar;
+    String kategori;
+    String letakBuku;
+    String gambar;
+    DateTime tanggalDitambahkan;
+    int stok;
+
     factory Record.fromJson(Map<String, dynamic> json) => Record(
         bukuId: json["buku_id"],
-        nama: json["nama"],
-        pengarang: json["pengarang"],
+        judul: json["judul"],
+        penulis: json["penulis"],
         penerbit: json["penerbit"],
-        tahun: json["tahun"],
+        jumlahEksemplar: json["jumlah_eksemplar"],
+        kategori: json["kategori"],
+        letakBuku: json["letak_buku"],
+        gambar: json["gambar"],
         tanggalDitambahkan: DateTime.parse(json["tanggal_ditambahkan"]),
         stok: json["stok"],
     );
 
     Map<String, dynamic> toJson() => {
         "buku_id": bukuId,
-        "nama": nama,
-        "pengarang": pengarang,
+        "judul": judul,
+        "penulis": penulis,
         "penerbit": penerbit,
-        "tahun": tahun,
+        "jumlah_eksemplar": jumlahEksemplar,
+        "kategori": kategori,
+        "letak_buku": letakBuku,
+        "gambar": gambar,
         "tanggal_ditambahkan": tanggalDitambahkan.toIso8601String(),
         "stok": stok,
     };

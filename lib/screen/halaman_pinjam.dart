@@ -4,8 +4,8 @@ import 'package:library_client/model/response_get_data_id.dart';
 import 'package:library_client/service/api_service.dart';
 import 'package:library_client/service/size_config.dart';
 import 'package:library_client/model/model_push_notification.dart';
-import 'package:toast/toast.dart';
 import 'package:library_client/model/model_cloud_firestore.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 class HalamanPinjam extends StatefulWidget {
   static const String id = "HALAMANPINJAM";
@@ -31,12 +31,11 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
   Cloud cloud;
 
   String devicetoken = "";
-  static int prevLength = 0;
   String namaMhs = "";
+  String idMhs = "";
 
-  void takeGood() async {
-    responseGetDataId = await apiService.getDataById(widget.bukuId);
-  }
+  static int prevLength = 0;
+  
 
   @override
   void initState() {
@@ -57,37 +56,190 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
     getNamaMhs();
   }
 
+  void takeGood() async {
+    responseGetDataId = await apiService.getDataById(widget.bukuId);
+  }
+
   void getNamaMhs() {
     widget.user.getCurrentUser().then((user) {
       setState(() {
         namaMhs = user.data.nama;
+        idMhs = user.data.mhsId;
       });
     });
   }
 
-  Widget dataRecords() {
-    return Container(
-      child: Padding(
-        padding: const EdgeInsets.all(0.0),
+
+  @override
+  Widget build(BuildContext context) {
+    sizeConfig.init(context);
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0.0,
+        backgroundColor: Color(0xFF1E90FF),
+        centerTitle: true,
+        title: new Text("Library Client Apps", style: TextStyle(color: Colors.white)),                  
+      ),
+      body: Container(
+        child: Column(
+          children: <Widget>[
+            Expanded(child: Stack(children: <Widget>[backgroundHeader(), recordBuku()])),        
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: sizeConfig.getBlockHorizontal(2)),
+                child: Column(
+                children : <Widget>[
+                    itemBuku(), buttonStore()
+                  ]
+                ),
+              )
+            )
+            // detailBuku() 
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget backgroundHeader() {
+    return Container(      
+      width: double.infinity,
+      height: sizeConfig.getBlockVertical(45),
+      decoration: BoxDecoration(
+        color: Color(0xFF1E90FF),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(0),
+          bottomRight: Radius.circular(70),
+        ),
+      ),
+    );
+  }
+
+  Widget recordBuku() {
+    return Positioned(
+      top: sizeConfig.getBlockVertical(10),
+      left: sizeConfig.getBlockHorizontal(10),
+      right: sizeConfig.getBlockHorizontal(10),
+      child: Container(
+        width: sizeConfig.getBlockHorizontal(40),
+        height: sizeConfig.getBlockVertical(40),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(sizeConfig.getBlockHorizontal(2)),
+        ),
         child: FutureBuilder<ResponseGetDataId>(
           future: apiService.getDataById(widget.bukuId),
           builder: (context, snapshot) {
-            if(snapshot.connectionState == ConnectionState.waiting) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
               return Container(
-                width: double.infinity,
-                height: sizeConfig.getBlockVertical(60),
-                decoration: BoxDecoration(
-                  color: Colors.indigoAccent,                  
-                ),
-                child: CircularProgressIndicator()
+                width: sizeConfig.getBlockHorizontal(0),
+                height: sizeConfig.getBlockVertical(0),
               );
             } else {
-              return Stack(
-                children: <Widget>[
-                  backgroundHeader(),
-                  animationPerson(),
-                  summaryRecord()
-                ],
+              return Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: sizeConfig.getBlockVertical(2),
+                  horizontal: sizeConfig.getBlockHorizontal(5)
+                ),
+                child: Column(
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(sizeConfig.getBlockHorizontal(5)),
+                          child: Image.asset(
+                            "images/book-open-flat.png",
+                            height: sizeConfig.getBlockVertical(10), 
+                            width: sizeConfig.getBlockHorizontal(13), 
+                          ),
+                        ),
+                        SizedBox(width: sizeConfig.getBlockHorizontal(5)),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget> [
+                              Text(responseGetDataId.data.judul,
+                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: sizeConfig.getBlockHorizontal(4)),
+                              ),
+                              Divider()
+                            ]
+                          )
+                        )
+                      ],
+                    ),
+                    Divider(color: Colors.white,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: <Widget>[
+                        Expanded(
+                          child:  Column(
+                            children: <Widget>[                  
+                              Text('500', style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.bold)),
+                              Divider(color: Colors.white),
+                              Text('Eksemplar')
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: sizeConfig.getBlockHorizontal(5)),
+                        Expanded(
+                          child:  Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[                  
+                              Text("2020", style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.bold)),
+                              Divider(color: Colors.white),
+                              Text('Tahun')
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child:  Column(
+                            children: <Widget>[                  
+                              Text('A3', style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.bold)),
+                              Divider(color: Colors.white),
+                              Text('Letak')
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: sizeConfig.getBlockVertical(2), bottom: sizeConfig.getBlockVertical(1)),
+                      child: Column(              
+                        children: <Widget>[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget> [
+                              Icon(Icons.account_circle, color: Colors.blue),
+                              SizedBox(width: sizeConfig.getBlockHorizontal(2)),
+                              Expanded(child: Text(responseGetDataId.data.penulis, style: TextStyle(fontWeight: FontWeight.w400)))
+                            ]
+                          ),
+                          Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                          Row(                  
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget> [
+                              Icon(Icons.account_balance, color: Colors.green),
+                              SizedBox(width: sizeConfig.getBlockHorizontal(2)),
+                              Expanded(child: Text(responseGetDataId.data.penerbit, style: TextStyle(fontWeight: FontWeight.w400)))
+                            ]
+                          ),
+                          Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                          Row(                  
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget> [
+                              Icon(Icons.label, color: Colors.orange),
+                              SizedBox(width: sizeConfig.getBlockHorizontal(2)),
+                              Expanded(child: Text("Data Processing", style: TextStyle(fontWeight: FontWeight.w400)))
+                            ]
+                          )
+
+                        ],
+                      ),
+                    ),
+
+                  ],
+                ),
               );
             }
           }
@@ -96,110 +248,77 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    sizeConfig.init(context);
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0.0,
-        backgroundColor: Colors.indigoAccent,
-        centerTitle: true,
-        title: new Text("Library Client Apps", style: TextStyle(color: Colors.white)),                  
-      ),
-      body: Container(
-        child: Column(
-          children: <Widget>[        
-            Expanded(
-              child: dataRecords() 
-            ),
-            detailBuku()
-          ],
-        ),
-      ),
+  Widget itemBuku() {
 
-      // floatingActionButton: FloatingActionButton(
-      //   backgroundColor: Colors.indigo,
-      //   child: Icon(Icons.refresh),
-      //   onPressed: () {
-      //     setState(() {
-            
-      //     });
-      //   }
-      // ), 
-    );
-  }
-
-  Widget backgroundHeader() {
-    return Container(      
-      width: double.infinity,
-      height: sizeConfig.getBlockVertical(60),
+    return Container(
+      width: sizeConfig.getBlockHorizontal(80),
+      height: sizeConfig.getBlockVertical(35),
+      margin: EdgeInsets.symmetric(
+        vertical: sizeConfig.getBlockVertical(1), 
+        horizontal: sizeConfig.getBlockHorizontal(1)
+      ),
+      padding: EdgeInsets.only(
+        left: sizeConfig.getBlockHorizontal(4),
+        right: sizeConfig.getBlockHorizontal(4),
+        bottom: sizeConfig.getBlockVertical(3)
+      ),
       decoration: BoxDecoration(
-        color: Colors.indigoAccent,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(0),
-          bottomRight: Radius.circular(50),
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(sizeConfig.getBlockHorizontal(1)),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.grey[300], blurRadius: 5.0, offset: Offset(0, 3))
+        ],
       ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: sizeConfig.getBlockVertical(1), horizontal: sizeConfig.getBlockHorizontal(2)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            topBar()
-          ],
-        )
-      ),
-    );
-  }
-
-  Widget summaryRecord() {
-    return Positioned(
-      top: sizeConfig.getBlockVertical(40),
-      left: sizeConfig.getBlockHorizontal(10),
-      child: Container(
-        width: sizeConfig.getBlockHorizontal(80),
-        height: sizeConfig.getBlockVertical(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: sizeConfig.getBlockVertical(3), horizontal: sizeConfig.getBlockHorizontal(3)),
-          child: Column(
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Column(
-                    children: <Widget> [
-                      ClipRRect(
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-                        child: Icon(Icons.book, size: sizeConfig.getBlockHorizontal(15), color: Colors.indigo)
-                      ),
-                    ]
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      textDesc(responseGetDataId.data.nama, 
-                        55, 
-                        TextAlign.left, 
-                        sizeConfig.getBlockHorizontal(4)
-                      ),                      
-                      textDesc(responseGetDataId.data.pengarang, 
-                        55, 
-                        TextAlign.left, 
-                        sizeConfig.getBlockHorizontal(3)
-                      ),
-                    ],
-                  ),
-                ],
-              )
-            ],
-          ), 
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(top: sizeConfig.getBlockVertical(2), bottom: sizeConfig.getBlockVertical(1)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,              
+              children: <Widget>[
+                Text("Summary", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(5))),
+                Text("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged."),
+                Text("Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked")
+              ],
+            ),
+          ),
+        ],
       )
+    );
+  }  
+
+  Widget buttonStore() {
+    return Container(
+      width: sizeConfig.getBlockHorizontal(80),
+      height: sizeConfig.getBlockVertical(7),
+      margin: EdgeInsets.symmetric(
+        vertical: sizeConfig.getBlockVertical(1), 
+        horizontal: sizeConfig.getBlockHorizontal(1)
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: sizeConfig.getBlockHorizontal(0),
+        vertical: sizeConfig.getBlockVertical(0)
+      ),
+      decoration: BoxDecoration(
+        color: Colors.grey[80],
+        borderRadius: BorderRadius.circular(sizeConfig.getBlockHorizontal(1)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              inkWellBtnPinjam(),
+              Spacer(),
+              inkWellBtnRefresh()
+            ],
+          )
+        ],
+      ),
     );
   }
 
@@ -211,41 +330,7 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
           left:sizeConfig.getBlockHorizontal(4),         
           right:sizeConfig.getBlockHorizontal(2)
       ),
-    child: Row(      
-      children: <Widget>[
-        Text(
-          "Interested to this book?",
-          style: TextStyle(
-            fontWeight: FontWeight.w600, 
-            fontSize: sizeConfig.getBlockHorizontal(5),
-            color: Colors.white)
-        ),
-        Spacer(),
-        IconButton(
-          icon: Icon(Icons.search, color: Colors.white), 
-          onPressed: null
-        ),
-        CircleAvatar(
-          backgroundImage: NetworkImage("https://i.pinimg.com/originals/7c/c7/a6/7cc7a630624d20f7797cb4c8e93c09c1.png"),
-        )
-      ],
-      )
-    );
-  }
-
-
-  Widget animationPerson() {
-
-    return Positioned(
-      top: sizeConfig.getBlockVertical(10),
-      left: sizeConfig.getBlockHorizontal(0),
-      right: sizeConfig.getBlockHorizontal(5),
-      child: Container(
-        margin: EdgeInsets.all(sizeConfig.getBlockHorizontal(1)),
-        child: Center(
-          child: Image.asset('images/transparent/people-reading.png', height: sizeConfig.getBlockHorizontal(40), width: sizeConfig.getBlockVertical(80))
-        ),
-      )
+    child: Row(children: <Widget>[])
     );
   }
 
@@ -261,104 +346,9 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
     );
   }  
 
-
-  Widget detailBuku() {    
-    return Container(
-      width: sizeConfig.getBlockHorizontal(80),
-      height: sizeConfig.getBlockVertical(37),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10)
-      ),
-      child: Padding(
-        padding: EdgeInsets.only(top: 20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                textDesc("As an educator and researcher in the field of algorithms for over two decades, I can unequivocally say that the Cormen et al book is the best textbook that I have ever seen on this subject. It offers an incisive, encyclopedic, and modern treatment of algorithms, and our department will continue to use it for teaching at both the graduate and undergraduate levels, as well as a reliable research reference, --Gabriel Robins, Department of Computer Science, University of Virginia (Gabriel Robins)", 80, TextAlign.left, sizeConfig.getBlockHorizontal(3)),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                // InkWell(
-                //   splashColor: Colors.indigo,
-                //   borderRadius: BorderRadius.circular(10.0),
-                //   child: Container(
-                //     padding: EdgeInsets.symmetric(vertical: sizeConfig.getBlockVertical(0), horizontal: sizeConfig.getBlockHorizontal(20)),                    
-                //     width: sizeConfig.getBlockHorizontal(80),
-                //     height: sizeConfig.getBlockVertical(7),
-                //     decoration: BoxDecoration(
-                //       color: Colors.indigoAccent,
-                //       borderRadius: BorderRadius.circular(10)
-                //     ),
-                //     child: ListTile(
-                //       title: Text('pinjam buku ini', style: TextStyle(color: Colors.white, fontSize: sizeConfig.getBlockHorizontal(5))),                      
-                //     ),
-                //   ),
-                //   onTap: () {
-
-                //       cloud.storeToCloud(
-                //         widget.bukuId,
-                //         responseGetDataId.data.nama,
-                //         namaMhs,
-                //         pushNotif.getToken()
-                //       );
-                //       Navigator.pop(context);                      
-                //       // Navigator.pushNamedAndRemoveUntil(context, 
-                //       //   HalamanBeranda.id, (Route<dynamic> route) => false);
-                //       setState(() {});
-                //       Toast.show('Berhasil', context);
-                    
-                //       // // simpan panjang data peminjaman
-                //       // prevLength = peminjaman.length;
-
-                //       // // tambah data ke list peminjaman
-                //       // peminjaman.add(
-                //       //   RecordPeminjaman(
-                //       //     namaMhs: "Khoirul Anwar",
-                //       //     namaBuku: responseGetDataId.data.nama,
-                //       //     bukuId: widget.bukuId,
-                //       //     devToken: pushNotif.getToken() 
-                //       //   )
-                //       // );
-
-                //       // if ((peminjaman.length - prevLength) == 1 ) {
-                        
-                //       //   // // tambahkan data ke cloud firestore
-                //       //   // print("Data berhasil ditambahkan");
-                        
-
-                //       //   // Navigator.pushNamedAndRemoveUntil(context, 
-                //       //   //   HalamanBeranda.id, 
-                //       //   //   (Route<dynamic> route) => false);
-                //       //   // setState(() {});
-                //       //   // Toast.show('Berhasil', context);
-                      
-                //       // } else {
-                //       //   Toast.show('Gagal', context);
-                //       // }
-                //   },
-                // ),
-                inkWellBtnPinjam(),
-                Divider(),
-                Divider(),
-                inkWellBtnRefresh()
-              ],
-            )
-          ] 
-        ) 
-      ),
-    );  
-  }
-
   Widget inkWellBtnRefresh() {
     return InkWell(
-      splashColor: Colors.indigo,
+      splashColor: Color(0xFF1E90FF),
       borderRadius: BorderRadius.circular(sizeConfig.getBlockHorizontal(2)),
       child: Container(
         width: sizeConfig.getBlockHorizontal(20),
@@ -392,13 +382,13 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
 
   Widget inkWellBtnPinjam() {
     return InkWell(
-      splashColor: Colors.indigo,
+      splashColor: Color(0xFF1E90FF),
       borderRadius: BorderRadius.circular(sizeConfig.getBlockHorizontal(3)),
       child: Container(
         width: sizeConfig.getBlockHorizontal(59),
         height: sizeConfig.getBlockVertical(7),
         decoration: BoxDecoration(
-          color: Colors.indigoAccent,
+          color: Color(0xFF1E90FF),
           borderRadius: BorderRadius.circular(sizeConfig.getBlockHorizontal(2))
         ),
         child: Padding(
@@ -419,20 +409,40 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
       ),
       onTap: () {
 
+        // simpan ke mariadb
+        ApiService.postPeminjamanBuku(widget.bukuId, idMhs);
+
+        // simpan ke firestore
         cloud.storeToCloud(
           widget.bukuId,
-          responseGetDataId.data.nama,
+          idMhs,          
+          responseGetDataId.data.judul,
           namaMhs,
           pushNotif.getToken()
         );
-
-        setState(() {
-          Toast.show('Berhasil', context);         
-        });
-        Navigator.pop(context);
-                                      
+        String namaBuku = responseGetDataId.data.judul;
+        showAlert("$namaBuku berhasil dipinjam!", AlertType.success);                                      
       },
     );
+  }
+
+  void showAlert(String text, AlertType type) {
+   Alert(
+      context: context,
+      type: type,
+      title: "Status",
+      desc: text,
+      buttons: [
+        DialogButton(
+          child: Text(
+            "Confirm",
+            style: TextStyle(color: Colors.white, fontSize: sizeConfig.getBlockHorizontal(4)),
+          ),
+          onPressed: () => Navigator.pop(context),
+          width: sizeConfig.getBlockHorizontal(20),
+        )
+      ],
+    ).show();
   }
 
 }
