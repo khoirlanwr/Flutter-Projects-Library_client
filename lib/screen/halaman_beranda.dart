@@ -8,7 +8,7 @@ import 'package:library_client/service/api_service.dart';
 import 'package:library_client/service/size_config.dart';
 import 'package:library_client/screen/halaman_scan.dart';
 import 'package:library_client/screen/halaman_tambah_edit.dart';
-import 'package:library_client/screen/halaman_print.dart';
+import 'package:library_client/screen/halaman_testPrint.dart';
 import 'package:library_client/screen/halaman_peminjaman_ongoing.dart';
 import 'package:library_client/screen/halaman_riwayat_pinjam.dart';
 import 'package:library_client/screen/halaman_tambah_edit_kategori.dart';
@@ -74,7 +74,7 @@ class _HalamanBerandaState extends State<HalamanBeranda> {
   Widget itemBuku(Record buku) {
 
     String namaBuku = buku.judul;
-    String pengarang = buku.penulis;
+    String pengarang = buku.pengarang;
     String penerbit = buku.penerbit;
     String kategori = buku.kategori;
     // String tahunTerbit = buku.tahun;
@@ -101,7 +101,7 @@ class _HalamanBerandaState extends State<HalamanBeranda> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(sizeConfig.getBlockHorizontal(5)),
                 child: Image.asset(
-                  "images/book-open-flat.png",
+                  "images/cover2.png",
                   height: sizeConfig.getBlockVertical(10), //sizeConfig.getBlockVertical(10),
                   width: sizeConfig.getBlockHorizontal(15), //sizeConfig.getBlockHorizontal(10),
                 ),
@@ -136,7 +136,7 @@ class _HalamanBerandaState extends State<HalamanBeranda> {
   Widget itemBukuKategori(RecordKategori buku) {
 
     String namaBuku = buku.judul;
-    String pengarang = buku.penulis;
+    String pengarang = buku.pengarang;
     String penerbit = buku.penerbit;
     String kategori = buku.kategori;
     // String tahunTerbit = buku.tahun;
@@ -163,7 +163,7 @@ class _HalamanBerandaState extends State<HalamanBeranda> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(sizeConfig.getBlockHorizontal(5)),
                 child: Image.asset(
-                  "images/book-open-flat.png",
+                  "images/cover2.png",
                   height: sizeConfig.getBlockVertical(10), //sizeConfig.getBlockVertical(10),
                   width: sizeConfig.getBlockHorizontal(15), //sizeConfig.getBlockHorizontal(10),
                 ),
@@ -317,6 +317,7 @@ class _HalamanBerandaState extends State<HalamanBeranda> {
         value: 4,
         child: Text("Logout"),
       ),
+
     ],
     offset: Offset(10, 10),
     onSelected: (value) {
@@ -522,7 +523,7 @@ class _HalamanBerandaState extends State<HalamanBeranda> {
         onPressed: () {
           setState(() {
             Navigator.push(context,
-              MaterialPageRoute(builder: (context) => HalamanPrint()) 
+              MaterialPageRoute(builder: (context) => HalamanTestPrint()) 
             );
           });
         },

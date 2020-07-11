@@ -42,7 +42,7 @@ class _ScanScreenState extends State<ScanScreen> {
         children: <Widget>[
           Text(
             "Scan your barcode.",
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: sizeConfig.getBlockHorizontal(5)),          
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: sizeConfig.getBlockHorizontal(4)),          
           ),
           Spacer(),
           CircleAvatar(

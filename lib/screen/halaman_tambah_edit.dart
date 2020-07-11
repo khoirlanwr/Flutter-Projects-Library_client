@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:library_client/model/model_user_function.dart';
+import 'package:library_client/model/response_peminjaman_ongoing.dart';
 import 'package:library_client/model/response_post.dart';
 import 'package:library_client/service/size_config.dart';
 import 'package:library_client/model/model_cloud_firestore.dart';
 import 'package:library_client/model/model_push_notification.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:library_client/service/api_service.dart';
+import 'package:library_client/screen/halaman_print.dart';
 
 class HalamanTambahEdit extends StatefulWidget {
   static const String id = "HALAMANTAMBAHEDIT";
@@ -31,6 +33,7 @@ class _HalamanTambahEditState extends State<HalamanTambahEdit> {
   String idMhs = "";
 
   List<Widget> rate = [];
+  List<RecordOnGoing> listPeminjamanOnGoing = [];
 
   @override
   void initState() {
@@ -44,7 +47,35 @@ class _HalamanTambahEditState extends State<HalamanTambahEdit> {
 
     deviceToken = fcm.getToken();
     fcm.configureListen();    
+    // _getPeminjamanOnGoing();
+
   }
+
+  void _getPeminjamanOnGoing() async {
+    listPeminjamanOnGoing = await ApiService.peminjamanOnGoing(idMhs);
+    print("len: ");
+    print(listPeminjamanOnGoing.length);
+
+    // FutureBuilder<List<RecordOnGoing>>(
+    //   future: ApiService.peminjamanOnGoing(idMhs),
+    //   builder: (context, snapshot) {
+    //     if (snapshot.connectionState == ConnectionState.waiting) {
+    //       print('waiting data record future builder peminjaman on going');          
+    //     } else {
+    //       print("---------------------------------------------------------");
+    //       print("---------------------------------------------------------");
+    //       print('completed data record future builder peminjaman on going');
+    //       listPeminjamanOnGoing = snapshot.data;
+    //       print(listPeminjamanOnGoing.length);
+    //       print("---------------------------------------------------------");
+    //       print("---------------------------------------------------------");
+
+    //     }
+    //   }
+    // );    
+    // listPeminjamanOnGoing = await ApiService.peminjamanOnGoing(idMhs);
+  }
+
 
   void getNamaMhs() {
     widget.user.getCurrentUser().then((user) {
@@ -56,6 +87,45 @@ class _HalamanTambahEditState extends State<HalamanTambahEdit> {
   }
 
   
+  Widget dataRecords() {
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(0.0),
+        child: FutureBuilder<List<RecordOnGoing>>(
+          future: ApiService.peminjamanOnGoing(idMhs),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              print('waiting data record future builder peminjaman on going');
+              return Container(
+                height: 0,
+                width: 0,
+              );
+
+            } else {
+              print('completed data record future builder peminjaman on going');
+
+              // siapkan variable penampung
+              // List<RecordOnGoing> listPeminjamanOnGoing = [];
+
+              // assign hasil future query ke list records
+              if (snapshot.data == null) {
+                
+              } else {
+                listPeminjamanOnGoing = snapshot.data;
+              }
+              print(listPeminjamanOnGoing.length);
+              return Container(
+                height: 0,
+                width: 0,
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     sizeConfig.init(context);
@@ -92,6 +162,7 @@ class _HalamanTambahEditState extends State<HalamanTambahEdit> {
               )
             )
           ),
+          dataRecords(),
         ],
       ),
     );
@@ -102,11 +173,11 @@ class _HalamanTambahEditState extends State<HalamanTambahEdit> {
   Widget summaryCash() {
 
     String namaBuku = widget.record.judul;
-    String pengarang = widget.record.penulis;
+    String pengarang = widget.record.pengarang;
     String penerbit = widget.record.penerbit;
-    String eksemplar = widget.record.jumlahEksemplar;
-    String letakBuku = widget.record.letakBuku;
-    String tahunTerbit = "2020";
+    String bahasa = widget.record.bahasa;
+    String letakBuku = widget.record.lokasi;
+    String tahunTerbit = widget.record.tahunTerbit;
     String kategori = widget.record.kategori;
 
     return Positioned(
@@ -133,7 +204,7 @@ class _HalamanTambahEditState extends State<HalamanTambahEdit> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(sizeConfig.getBlockHorizontal(5)),
                     child: Image.asset(
-                      "images/book-open-flat.png",
+                      "images/cover2.png",
                       height: sizeConfig.getBlockVertical(10), //sizeConfig.getBlockVertical(10),
                       width: sizeConfig.getBlockHorizontal(13), //sizeConfig.getBlockHorizontal(10),
                     ),
@@ -153,16 +224,16 @@ class _HalamanTambahEditState extends State<HalamanTambahEdit> {
                   )
                 ],
               ),
-              Divider(color: Colors.white,),
+              Divider(color: Colors.white,height: sizeConfig.getBlockVertical(1)),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
                   Expanded(
                     child:  Column(
                       children: <Widget>[                  
-                        Text('$eksemplar', style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.bold)),
-                        Divider(color: Colors.white),
-                        Text('Eksemplar')
+                        Text('$bahasa', style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.bold)),
+                        Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                        Text('Bahasa', style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.w400))
                       ],
                     ),
                   ),
@@ -172,8 +243,8 @@ class _HalamanTambahEditState extends State<HalamanTambahEdit> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[                  
                         Text('$tahunTerbit', style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.bold)),
-                        Divider(color: Colors.white),
-                        Text('Tahun')
+                        Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                        Text('Tahun', style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.w400))
                       ],
                     ),
                   ),
@@ -181,8 +252,8 @@ class _HalamanTambahEditState extends State<HalamanTambahEdit> {
                     child:  Column(
                       children: <Widget>[                  
                         Text('$letakBuku', style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.bold)),
-                        Divider(color: Colors.white),
-                        Text('Letak')
+                        Divider(color: Colors.white,height: sizeConfig.getBlockVertical(1)),
+                        Text('Letak', style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.w400))
                       ],
                     ),
                   ),
@@ -197,7 +268,7 @@ class _HalamanTambahEditState extends State<HalamanTambahEdit> {
                       children: <Widget> [
                         Icon(Icons.account_circle, color: Colors.blue),
                         SizedBox(width: sizeConfig.getBlockHorizontal(2)),
-                        Expanded(child: Text("$pengarang", style: TextStyle(fontWeight: FontWeight.w400)))
+                        Expanded(child: Text("$pengarang", style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(3))))
                       ]
                     ),
                     Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
@@ -206,7 +277,7 @@ class _HalamanTambahEditState extends State<HalamanTambahEdit> {
                       children: <Widget> [
                         Icon(Icons.account_balance, color: Colors.green),
                         SizedBox(width: sizeConfig.getBlockHorizontal(2)),
-                        Expanded(child: Text("$penerbit", style: TextStyle(fontWeight: FontWeight.w400)))
+                        Expanded(child: Text("$penerbit", style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(3))))
                       ]
                     ),
                     Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
@@ -215,7 +286,7 @@ class _HalamanTambahEditState extends State<HalamanTambahEdit> {
                       children: <Widget> [
                         Icon(Icons.label, color: Colors.orange),
                         SizedBox(width: sizeConfig.getBlockHorizontal(2)),
-                        Expanded(child: Text("$kategori", style: TextStyle(fontWeight: FontWeight.w400)))
+                        Expanded(child: Text("$kategori", style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(3))))
                       ]
                     )
 
@@ -247,6 +318,14 @@ class _HalamanTambahEditState extends State<HalamanTambahEdit> {
 
   Widget itemBuku() {
 
+    String deskripsi = widget.record.deskripsi;
+    String edisi = widget.record.edisi;
+    String kotaTerbit = widget.record.kotaTerbit;
+    String isbn = widget.record.isbn; 
+    String noInventaris = widget.record.bukuId;
+    String umumres = widget.record.umumRes;
+    var stok = widget.record.stok; 
+
     return Container(
       width: sizeConfig.getBlockHorizontal(80),
       height: sizeConfig.getBlockVertical(35),
@@ -276,9 +355,73 @@ class _HalamanTambahEditState extends State<HalamanTambahEdit> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,              
               children: <Widget>[
-                Text("Summary", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(5))),
-                Text("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged."),
-                Text("Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked")
+                Text("Deskripsi buku: ", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(4))),
+                Text("$deskripsi", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(4))),
+
+                Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget> [
+                    // Icon(Icons.account_circle, color: Colors.blue),
+                    Text("No inventaris: ", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(4))),
+                    SizedBox(width: sizeConfig.getBlockHorizontal(2)),
+                    Expanded(child: Text("$noInventaris", style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(4))))
+                  ]
+                ),
+                Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                Row(                  
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget> [
+                    // Icon(Icons.account_balance, color: Colors.green),
+                    Text("Edisi: ", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(4))),
+                    SizedBox(width: sizeConfig.getBlockHorizontal(2)),
+                    Expanded(child: Text("$edisi", style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(4))))
+                  ]
+                ),
+                Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                Row(                  
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget> [
+                    Text("Kota terbit: ", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(4))),
+                    SizedBox(width: sizeConfig.getBlockHorizontal(2)),
+                    Expanded(child: Text("$kotaTerbit", style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(4))))
+                  ]
+                ),
+                Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                Row(                  
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget> [
+                    // Icon(Icons.label, color: Colors.orange),
+                    Text("ISBN: ", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(4))),
+                    SizedBox(width: sizeConfig.getBlockHorizontal(2)),
+                    Expanded(child: Text("$isbn", style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(4))))
+                  ]
+                ),
+                Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                Row(                  
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget> [
+                    // Icon(Icons.label, color: Colors.orange),
+                    Text("Umum/res: ", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(4))),
+                    SizedBox(width: sizeConfig.getBlockHorizontal(2)),
+                    Expanded(child: Text("$umumres", style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(4))))
+                  ]
+                ),
+                Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                Row(                  
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget> [
+                    // Icon(Icons.label, color: Colors.orange),
+                    Text("Status: ", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(4))),
+                    SizedBox(width: sizeConfig.getBlockHorizontal(2)),
+                    Expanded(child: Text("$stok", style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(4))))
+                  ]
+                )
+
+                // Text("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.", style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.w400)),
+                // Text("Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked", style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.w400))
               ],
             ),
           ),
@@ -363,6 +506,7 @@ class _HalamanTambahEditState extends State<HalamanTambahEdit> {
           ),
           child: ListTile(
             title: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Icon(Icons.save, color: Colors.white),
@@ -396,6 +540,7 @@ class _HalamanTambahEditState extends State<HalamanTambahEdit> {
           ),
           child: ListTile(
             title: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 SizedBox(width: sizeConfig.getBlockHorizontal(2)),
@@ -435,25 +580,62 @@ class _HalamanTambahEditState extends State<HalamanTambahEdit> {
 
   void storeToCloud() async {
 
-    // simpan ke database firestore dan mariaDB
+    print('panjang list peminjaman on going: ');
+    print(listPeminjamanOnGoing.length);
 
-    // simpan data ke mariaDB
-    ApiService.postPeminjamanBuku(widget.record.bukuId, idMhs);
 
-    // simpan data ke firestore
     String namaBuku = widget.record.judul;
-    deviceToken = await fcm.getToken();
-    if (deviceToken.isNotEmpty) {
-      cloud.storeToCloud(widget.record.bukuId, idMhs, widget.record.judul, namaMhs, deviceToken);
+    // kondisi 1: apabila stok buku 0 maka gagal pinjam
+    // kondisi 2: apabila peminjaman berlangsung sama dengan 2 buku, maka gagal pinjam
+    // kondisi 3: boleh pinjam apabila tidak memenuhi dua kondisi sebelumnya
+    if (widget.record.stok == 0) {
+      // maka gagal pinjam karena stok buku habis
       showAlert(
-        "Buku $namaBuku berhasil dipinjam!", AlertType.success
-      );
-
+        "stok buku $namaBuku kosong!", AlertType.error
+      );      
+    } else if (listPeminjamanOnGoing.length >= 2) {
+      // maka gagal pinjam karena masih meminjam lebih dari sama dengan 2 buku
+      print(listPeminjamanOnGoing.length);
+      showAlert(
+        "anda telah meminjam lebih dari 2 buku!", AlertType.error
+      );      
     } else {
-      showAlert(
-        "Peminjaman buku $namaBuku gagal", AlertType.error
-      );
+      // maka bisa pinjam
+      // simpan ke database firestore dan mariaDB
+      // simpan data ke mariaDB
+      ApiService.postPeminjamanBuku(widget.record.bukuId, idMhs);
+
+      // simpan data ke firestore
+      deviceToken = await fcm.getToken();      
+      if (deviceToken.isNotEmpty) {
+        cloud.storeToCloud(widget.record.bukuId, idMhs, widget.record.judul, namaMhs, deviceToken);
+
+        Alert(
+            context: context,
+            type: AlertType.success,
+            title: "Status",
+            desc: "Buku $namaBuku berhasil dipinjam!",
+            buttons: [
+              DialogButton(
+                child: Text(
+                  "Confirm",
+                  style: TextStyle(color: Colors.white, fontSize: sizeConfig.getBlockHorizontal(4)),
+                ),
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => HalamanPrint(idUser: idMhs, namaMhs: namaMhs, judulBuku: widget.record.judul))),
+                width: sizeConfig.getBlockHorizontal(20),
+              )
+            ],
+          ).show();
+
+      } else {
+        showAlert(
+          "simpan buku $namaBuku ke firebase gagal!", AlertType.error
+        );
+      }
+
     }
+
+
   }
 
   Widget animationPerson() {

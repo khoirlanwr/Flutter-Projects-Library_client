@@ -20,15 +20,26 @@ class User implements BaseUser {
 
 
   Future<String> signIn(String username, String password) async {
-    _responseUserLogin = await _api.loginUser(username, password);
-    if (_responseUserLogin.status == true) {
-      await storage.write(key: "mhsId", value: _responseUserLogin.data.mhsId);
-      await storage.write(key: "password", value: password);
-      _alreadyLogin = true;
-    }  
+    // _responseUserLogin = await _api.loginUser(username, password);
+    // if (_responseUserLogin.status == true) {
+    //   await storage.write(key: "mhsId", value: _responseUserLogin.data.mhsId);
+    //   await storage.write(key: "password", value: password);
+    //   _alreadyLogin = true;
+    // }  
       
+    // return _responseUserLogin.data.mhsId;
 
-    return _responseUserLogin.data.mhsId;    
+    String result = await _api.login(username, password);
+    
+    if (result != "404") {
+      await storage.write(key: "mhsId", value: result);
+      await storage.write(key: "password", value: password);
+
+      _responseUserLogin = await _api.loginUser(username, password);      
+      _alreadyLogin = true;      
+    }
+
+    return result;
   }
 
   Future<ResponseUserLogin> getCurrentUser() async {

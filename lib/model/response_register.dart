@@ -1,15 +1,15 @@
 // To parse this JSON data, do
 //
-//     final responseUserLogin = responseUserLoginFromJson(jsonString);
+//     final responseRegister = responseRegisterFromJson(jsonString);
 
 import 'dart:convert';
 
-ResponseUserLogin responseUserLoginFromJson(String str) => ResponseUserLogin.fromJson(json.decode(str));
+ResponseRegister responseRegisterFromJson(String str) => ResponseRegister.fromJson(json.decode(str));
 
-String responseUserLoginToJson(ResponseUserLogin data) => json.encode(data.toJson());
+String responseRegisterToJson(ResponseRegister data) => json.encode(data.toJson());
 
-class ResponseUserLogin {
-    ResponseUserLogin({
+class ResponseRegister {
+    ResponseRegister({
         this.status,
         this.data,
         this.message,
@@ -19,7 +19,7 @@ class ResponseUserLogin {
     Data data;
     String message;
 
-    factory ResponseUserLogin.fromJson(Map<String, dynamic> json) => ResponseUserLogin(
+    factory ResponseRegister.fromJson(Map<String, dynamic> json) => ResponseRegister(
         status: json["status"],
         data: Data.fromJson(json["data"]),
         message: json["message"],

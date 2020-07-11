@@ -107,8 +107,13 @@ class _HalamanRiwayatPeminjamanState extends State<HalamanRiwayatPeminjaman> {
               // siapkan variable penampung
               List<RecordRiwayatPeminjaman> listPeminjamanOnGoing = [];
 
-              // assign hasil future query ke list records
-              listPeminjamanOnGoing = snapshot.data;
+              if (snapshot.data == null ) {
+
+              } else {
+                // assign hasil future query ke list records
+                listPeminjamanOnGoing = snapshot.data;
+
+              }
               // print(listPeminjamanOnGoing.length);
 
               return ListView.builder(

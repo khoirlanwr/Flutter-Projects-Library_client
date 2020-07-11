@@ -80,11 +80,18 @@ class Record {
     Record({
         this.bukuId,
         this.judul,
-        this.penulis,
+        this.edisi,
+        this.pengarang,
+        this.kotaTerbit,
         this.penerbit,
-        this.jumlahEksemplar,
+        this.tahunTerbit,
+        this.isbn,
+        this.klasifikasi,
         this.kategori,
-        this.letakBuku,
+        this.umumRes,
+        this.bahasa,
+        this.deskripsi,
+        this.lokasi,
         this.gambar,
         this.tanggalDitambahkan,
         this.stok,
@@ -92,11 +99,18 @@ class Record {
 
     String bukuId;
     String judul;
-    String penulis;
+    String edisi;
+    String pengarang;
+    String kotaTerbit;
     String penerbit;
-    String jumlahEksemplar;
+    String tahunTerbit;
+    String isbn;
+    String klasifikasi;
     String kategori;
-    String letakBuku;
+    String umumRes;
+    String bahasa;
+    String deskripsi;
+    String lokasi;
     String gambar;
     DateTime tanggalDitambahkan;
     int stok;
@@ -104,11 +118,18 @@ class Record {
     factory Record.fromJson(Map<String, dynamic> json) => Record(
         bukuId: json["buku_id"],
         judul: json["judul"],
-        penulis: json["penulis"],
+        edisi: json["edisi"],
+        pengarang: json["pengarang"],
+        kotaTerbit: json["kota_terbit"],
         penerbit: json["penerbit"],
-        jumlahEksemplar: json["jumlah_eksemplar"],
+        tahunTerbit: json["tahun_terbit"],
+        isbn: json["isbn"],
+        klasifikasi: json["klasifikasi"],
         kategori: json["kategori"],
-        letakBuku: json["letak_buku"],
+        umumRes: json["umum_res"],
+        bahasa: json["bahasa"],
+        deskripsi: json["deskripsi"],
+        lokasi: json["lokasi"],
         gambar: json["gambar"],
         tanggalDitambahkan: DateTime.parse(json["tanggal_ditambahkan"]),
         stok: json["stok"],
@@ -117,13 +138,20 @@ class Record {
     Map<String, dynamic> toJson() => {
         "buku_id": bukuId,
         "judul": judul,
-        "penulis": penulis,
+        "edisi": edisi,
+        "pengarang": pengarang,
+        "kota_terbit": kotaTerbit,
         "penerbit": penerbit,
-        "jumlah_eksemplar": jumlahEksemplar,
+        "tahun_terbit": tahunTerbit,
+        "isbn": isbn,
+        "klasifikasi": klasifikasi,
         "kategori": kategori,
-        "letak_buku": letakBuku,
+        "umum_res": umumRes,
+        "bahasa": bahasa,
+        "deskripsi": deskripsi,
+        "lokasi": lokasi,
         "gambar": gambar,
-        "tanggal_ditambahkan": tanggalDitambahkan.toIso8601String(),
+        "tanggal_ditambahkan": "${tanggalDitambahkan.year.toString().padLeft(4, '0')}-${tanggalDitambahkan.month.toString().padLeft(2, '0')}-${tanggalDitambahkan.day.toString().padLeft(2, '0')}",
         "stok": stok,
     };
 }

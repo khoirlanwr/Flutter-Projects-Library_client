@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:library_client/model/model_user_function.dart';
 import 'package:library_client/model/response_get_data_id.dart';
+import 'package:library_client/model/response_peminjaman_ongoing.dart';
 import 'package:library_client/service/api_service.dart';
 import 'package:library_client/service/size_config.dart';
 import 'package:library_client/model/model_push_notification.dart';
 import 'package:library_client/model/model_cloud_firestore.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:library_client/screen/halaman_print.dart';
 
 class HalamanPinjam extends StatefulWidget {
   static const String id = "HALAMANPINJAM";
@@ -35,6 +37,7 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
   String idMhs = "";
 
   static int prevLength = 0;
+  List<RecordOnGoing> listPeminjamanOnGoing = [];
   
 
   @override
@@ -54,6 +57,8 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
     // initial listen config
     pushNotif.configureListen();
     getNamaMhs();
+
+    // getPeminjamanBerlangsung();
   }
 
   void takeGood() async {
@@ -69,6 +74,45 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
     });
   }
 
+  Widget dataRecords() {
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(0.0),
+        child: FutureBuilder<List<RecordOnGoing>>(
+          future: ApiService.peminjamanOnGoing(idMhs),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              print('waiting data record future builder peminjaman on going');
+              return Container(
+                height: 0,
+                width: 0,
+              );
+
+            } else {
+              print('completed data record future builder peminjaman on going');
+
+              // siapkan variable penampung
+              // List<RecordOnGoing> listPeminjamanOnGoing = [];
+              if (snapshot.data == null) {
+
+              } else {
+                // assign hasil future query ke list records
+                listPeminjamanOnGoing = snapshot.data;
+              }
+
+              print(listPeminjamanOnGoing.length);
+
+              return Container(
+                height: 0,
+                width: 0,
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +137,8 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
                   ]
                 ),
               )
-            )
+            ),
+            dataRecords()
             // detailBuku() 
           ],
         ),
@@ -116,6 +161,11 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
   }
 
   Widget recordBuku() {
+
+    String bahasa = responseGetDataId.data.bahasa;
+    String letakBuku = responseGetDataId.data.lokasi;
+    String tahunBuku = responseGetDataId.data.tahunTerbit;
+
     return Positioned(
       top: sizeConfig.getBlockVertical(10),
       left: sizeConfig.getBlockHorizontal(10),
@@ -149,7 +199,7 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(sizeConfig.getBlockHorizontal(5)),
                           child: Image.asset(
-                            "images/book-open-flat.png",
+                            "images/cover2.png",
                             height: sizeConfig.getBlockVertical(10), 
                             width: sizeConfig.getBlockHorizontal(13), 
                           ),
@@ -168,16 +218,16 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
                         )
                       ],
                     ),
-                    Divider(color: Colors.white,),
+                    Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: <Widget>[
                         Expanded(
                           child:  Column(
                             children: <Widget>[                  
-                              Text('500', style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.bold)),
-                              Divider(color: Colors.white),
-                              Text('Eksemplar')
+                              Text('$bahasa', style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.bold)),
+                              Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                              Text('Bahasa', style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.w400))
                             ],
                           ),
                         ),
@@ -186,18 +236,18 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
                           child:  Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[                  
-                              Text("2020", style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.bold)),
-                              Divider(color: Colors.white),
-                              Text('Tahun')
+                              Text("$tahunBuku", style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.bold)),
+                              Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                              Text('Tahun', style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.w400))
                             ],
                           ),
                         ),
                         Expanded(
                           child:  Column(
                             children: <Widget>[                  
-                              Text('A3', style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.bold)),
-                              Divider(color: Colors.white),
-                              Text('Letak')
+                              Text('$letakBuku', style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.bold)),
+                              Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                              Text('Letak', style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.w400))
                             ],
                           ),
                         ),
@@ -212,7 +262,7 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
                             children: <Widget> [
                               Icon(Icons.account_circle, color: Colors.blue),
                               SizedBox(width: sizeConfig.getBlockHorizontal(2)),
-                              Expanded(child: Text(responseGetDataId.data.penulis, style: TextStyle(fontWeight: FontWeight.w400)))
+                              Expanded(child: Text(responseGetDataId.data.pengarang, style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(3))))
                             ]
                           ),
                           Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
@@ -221,7 +271,7 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
                             children: <Widget> [
                               Icon(Icons.account_balance, color: Colors.green),
                               SizedBox(width: sizeConfig.getBlockHorizontal(2)),
-                              Expanded(child: Text(responseGetDataId.data.penerbit, style: TextStyle(fontWeight: FontWeight.w400)))
+                              Expanded(child: Text(responseGetDataId.data.penerbit, style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(3))))
                             ]
                           ),
                           Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
@@ -230,7 +280,7 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
                             children: <Widget> [
                               Icon(Icons.label, color: Colors.orange),
                               SizedBox(width: sizeConfig.getBlockHorizontal(2)),
-                              Expanded(child: Text("Data Processing", style: TextStyle(fontWeight: FontWeight.w400)))
+                              Expanded(child: Text(responseGetDataId.data.kategori, style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(3))))
                             ]
                           )
 
@@ -249,6 +299,14 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
   }
 
   Widget itemBuku() {
+
+    String deskripsi = responseGetDataId.data.deskripsi;
+    String edisi = responseGetDataId.data.edisi;
+    String kotaTerbit = responseGetDataId.data.kotaTerbit;
+    String isbn = responseGetDataId.data.isbn; 
+    String noInventaris = responseGetDataId.data.bukuId;
+    String umumres = responseGetDataId.data.umumRes;
+    var stok = responseGetDataId.data.stok;
 
     return Container(
       width: sizeConfig.getBlockHorizontal(80),
@@ -279,9 +337,77 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,              
               children: <Widget>[
-                Text("Summary", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(5))),
-                Text("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged."),
-                Text("Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked")
+                Text("Deskripsi buku: ", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(4))),
+                Text("$deskripsi", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(4))),
+
+                Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget> [
+                    // Icon(Icons.account_circle, color: Colors.blue),
+                    Text("No inventaris: ", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(4))),
+                    SizedBox(width: sizeConfig.getBlockHorizontal(2)),
+                    Expanded(child: Text("$noInventaris", style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(4))))
+                  ]
+                ),
+                Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                Row(                  
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget> [
+                    // Icon(Icons.account_balance, color: Colors.green),
+                    Text("Edisi: ", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(4))),
+                    SizedBox(width: sizeConfig.getBlockHorizontal(2)),
+                    Expanded(child: Text("$edisi", style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(4))))
+                  ]
+                ),
+                Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                Row(                  
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget> [
+                    Text("Kota terbit: ", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(4))),
+                    SizedBox(width: sizeConfig.getBlockHorizontal(2)),
+                    Expanded(child: Text("$kotaTerbit", style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(4))))
+                  ]
+                ),
+                Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                Row(                  
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget> [
+                    // Icon(Icons.label, color: Colors.orange),
+                    Text("ISBN: ", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(4))),
+                    SizedBox(width: sizeConfig.getBlockHorizontal(2)),
+                    Expanded(child: Text("$isbn", style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(4))))
+                  ]
+                ),
+                Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                Row(                  
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget> [
+                    // Icon(Icons.label, color: Colors.orange),
+                    Text("Umum/res: ", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(4))),
+                    SizedBox(width: sizeConfig.getBlockHorizontal(2)),
+                    Expanded(child: Text("$umumres", style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(4))))
+                  ]
+                ),
+                Divider(color: Colors.white, height: sizeConfig.getBlockVertical(1)),
+                Row(                  
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget> [
+                    // Icon(Icons.label, color: Colors.orange),
+                    Text("Status: ", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(4))),
+                    SizedBox(width: sizeConfig.getBlockHorizontal(2)),
+                    Expanded(child: Text("$stok", style: TextStyle(fontWeight: FontWeight.w400, fontSize: sizeConfig.getBlockHorizontal(4))))
+                  ]
+                )
+
+                // Text("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.", style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.w400)),
+                // Text("Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked", style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.w400))
+
+                // Text("Summary", style: TextStyle(fontSize: sizeConfig.getBlockHorizontal(4))),
+                // Text("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.", style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.w400)),
+                // Text("Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked", style: TextStyle(color: Colors.black, fontSize: sizeConfig.getBlockHorizontal(3), fontWeight: FontWeight.w400))
               ],
             ),
           ),
@@ -363,6 +489,7 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
           ),
           child: ListTile(
             title: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 SizedBox(width: sizeConfig.getBlockHorizontal(2)),
@@ -397,6 +524,7 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
           ),
           child: ListTile(
             title: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Icon(Icons.save, color: Colors.white),
@@ -408,20 +536,111 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
         )
       ),
       onTap: () {
+        print('panjang list peminjaman on going: ');
+        print(listPeminjamanOnGoing.length);
+        
+        var stokBuku = responseGetDataId.data.stok;
+        String namaBuku = responseGetDataId.data.judul;
+        
+        // cek kondisi 
+        if (stokBuku <= 0) {
+          // gagal pinjam karena stok kosong
+          Alert(
+            context: context,
+            type: AlertType.error,
+            title: "Status",
+            desc: "Stok buku $namaBuku kosong!",
+            buttons: [
+              DialogButton(
+                child: Text(
+                  "Confirm",
+                  style: TextStyle(color: Colors.white, fontSize: sizeConfig.getBlockHorizontal(4)),
+                ),
+                onPressed: () => Navigator.pop(context),
+                width: sizeConfig.getBlockHorizontal(20),
+              )
+            ],
+          ).show();
+
+        } else if (listPeminjamanOnGoing.length >= 2) {
+          // gagal pinjam karena masih ada 2 buku yang belum dikembalikan
+          Alert(
+            context: context,
+            type: AlertType.error,
+            title: "Status",
+            desc: "Masih ada 2 buku yang belum dikembalikan!",
+            buttons: [
+              DialogButton(
+                child: Text(
+                  "Confirm",
+                  style: TextStyle(color: Colors.white, fontSize: sizeConfig.getBlockHorizontal(4)),
+                ),
+                onPressed: () => Navigator.pop(context),
+                width: sizeConfig.getBlockHorizontal(20),
+              )
+            ],
+          ).show();
+
+        } else {
+          // lanjutkan proses peminjaman
+
+          // simpan ke mariadb
+          ApiService.postPeminjamanBuku(widget.bukuId, idMhs);
+
+          // simpan ke firestore 
+          cloud.storeToCloud(
+            widget.bukuId,
+            idMhs,          
+            responseGetDataId.data.judul,
+            namaMhs,
+            pushNotif.getToken()
+          );
+
+          // konfirmasi cetak struk peminjaman
+          Alert(
+              context: context,
+              type: AlertType.success,
+              title: "Status",
+              desc: "Buku $namaBuku berhasil dipinjam",
+              buttons: [
+                DialogButton(
+                  child: Text(
+                    "Confirm",
+                    style: TextStyle(color: Colors.white, fontSize: sizeConfig.getBlockHorizontal(4)),
+                  ),
+                  onPressed: () => Navigator.push(context, 
+                    MaterialPageRoute(builder: (context) => HalamanPrint(idUser: idMhs, namaMhs: namaMhs, judulBuku: namaBuku))),
+                  width: sizeConfig.getBlockHorizontal(20),
+                )
+              ],
+            ).show();
+
+
+        }
 
         // simpan ke mariadb
-        ApiService.postPeminjamanBuku(widget.bukuId, idMhs);
+        // ApiService.postPeminjamanBuku(widget.bukuId, idMhs);
 
         // simpan ke firestore
-        cloud.storeToCloud(
-          widget.bukuId,
-          idMhs,          
-          responseGetDataId.data.judul,
-          namaMhs,
-          pushNotif.getToken()
-        );
-        String namaBuku = responseGetDataId.data.judul;
-        showAlert("$namaBuku berhasil dipinjam!", AlertType.success);                                      
+        // cloud.storeToCloud(
+        //   widget.bukuId,
+        //   idMhs,          
+        //   responseGetDataId.data.judul,
+        //   namaMhs,
+        //   pushNotif.getToken()
+        // );
+        // String namaBuku = responseGetDataId.data.judul;
+
+      // cetak struk peminjaman
+      // setState(() {
+      //   Navigator.push(context, 
+      //     MaterialPageRoute(builder: (context) => HalamanPrint(idUser: idMhs, namaMhs: namaMhs, judulBuku: responseGetDataId.data.judul))
+      //   );
+      // });
+
+
+        // showAlert("$namaBuku berhasil dipinjam!", AlertType.success);                                      
+
       },
     );
   }
@@ -444,5 +663,6 @@ class _HalamanPinjamState extends State<HalamanPinjam> {
       ],
     ).show();
   }
+
 
 }

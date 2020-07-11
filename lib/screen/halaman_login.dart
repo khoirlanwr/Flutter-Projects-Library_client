@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:library_client/model/model_user_function.dart';
 import 'package:library_client/model/model_user_login.dart';
 import 'package:library_client/service/size_config.dart';
+import 'package:library_client/screen/halaman_register.dart';
 
 class HalamanLogin extends StatefulWidget {
   static const String id = "HALAMANLOGIN";
@@ -48,6 +49,14 @@ class _HalamanLoginState extends State<HalamanLogin>
     _controller.dispose();
   }
 
+  void setToRegisterPage() {
+    setState(() {
+      Navigator.push(context,
+        MaterialPageRoute(builder: (context) => HalamanRegister()) 
+      );            
+    });
+  }
+
   void validateAndSubmit() async {
 
     setState(() {
@@ -60,14 +69,23 @@ class _HalamanLoginState extends State<HalamanLogin>
       try {
         _userID =  await widget.user.signIn(_username, _password);            
 
+
         setState(() {
           _isLoading = false;
         });
 
-        if ((_userID.length > 0) && (_userID != null)) {
+        if (_userID == "404") {
+          print('Wrong username or password!');
+          setState(() {
+            _isLoading = false;
+            _errorMessage = 'Wrong username or password!';
+            _formKey.currentState.reset();
+          });
+          
+        } else if ((_userID.length > 0) && (_userID != "404")) {
           print('signed in: $_userID');
           widget.loginCallback();
-        }
+        } 
       } catch(e) {
         print('Error: $e');
         setState(() {
@@ -93,9 +111,6 @@ class _HalamanLoginState extends State<HalamanLogin>
       return false;
     }
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -129,6 +144,7 @@ class _HalamanLoginState extends State<HalamanLogin>
               showUsernameInput(),
               showPasswordInput(),
               showPrimaryButton(),
+              showSecondaryButton(),
               showErrorMessage()
             ],
           )
@@ -159,7 +175,7 @@ class _HalamanLoginState extends State<HalamanLogin>
         child: CircleAvatar(
           backgroundColor: Colors.transparent,
           radius: sizeConfig.getBlockHorizontal(20),
-          child: Image.asset('images/owl.png'),
+          child: Image.asset('images/simbol.png'),
         ),
       ),
     );
@@ -217,15 +233,38 @@ class _HalamanLoginState extends State<HalamanLogin>
     );
   }
 
+  Widget showSecondaryButton() {
+    return new Padding(
+      padding: EdgeInsets.fromLTRB(0, sizeConfig.getBlockVertical(5), 0, 0),
+      child: SizedBox(
+        height: sizeConfig.getBlockVertical(6),
+        child: RaisedButton(
+          elevation: 5.0,
+          shape: new RoundedRectangleBorder(
+            borderRadius: new BorderRadius.circular(sizeConfig.getBlockHorizontal(5))
+          ),
+          color: Colors.white,
+          child: new Text('register',
+            style: new TextStyle(fontSize: sizeConfig.getBlockHorizontal(5), color: Color(0xFF1E90FF))),
+          onPressed: setToRegisterPage,
+        ),
+      ),
+    );
+  }  
+
   Widget showErrorMessage() {
     if ((_errorMessage.length > 0 ) || (_errorMessage != null)) {
-      return new Text(
-        _errorMessage,
-        style: TextStyle(
-          fontSize: sizeConfig.getBlockHorizontal(5),
-          color: Colors.red,
-          height: 1.0,
-          fontWeight: FontWeight.w300
+      return new Padding(
+        padding: EdgeInsetsDirectional.only(start: sizeConfig.getBlockHorizontal(7), top: sizeConfig.getBlockVertical(5)),
+        // padding: EdgeInsets.symmetric(vertical: sizeConfig.getBlockVertical(5), horizontal: sizeConfig.getBlockHorizontal(4)),
+        child: Text(
+          _errorMessage,
+          style: TextStyle(
+            fontSize: sizeConfig.getBlockHorizontal(5),
+            color: Colors.red,
+            height: 1.0,
+            fontWeight: FontWeight.w300
+          ),
         ),
       );
     } else {

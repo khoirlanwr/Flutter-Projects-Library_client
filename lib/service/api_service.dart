@@ -8,6 +8,7 @@ import 'package:library_client/model/response_create_viewId.dart';
 import 'package:library_client/model/response_get_data_id.dart';
 import 'package:library_client/model/response_post_user.dart';
 import 'package:library_client/model/response_post_peminjaman.dart';
+import 'package:library_client/model/response_register.dart';
 import 'package:library_client/model/response_riwayat_peminjaman.dart';
 import 'package:library_client/model/response_list_kategori.dart';
 import 'package:library_client/model/response_kategori.dart';
@@ -91,7 +92,7 @@ class ApiService {
     timeBorrowedBook = timeParser(timeBorrowedBook);    
 
     var now = new DateTime.now();
-    var timeReturnedBook = now.add(new Duration(days: 7));
+    var timeReturnedBook = now.add(new Duration(days: 14));
     String timeReturnedBooks = timeParser(timeReturnedBook.toIso8601String());
 
     Map data = {
@@ -195,14 +196,126 @@ class ApiService {
     
     if(response.statusCode == 200) {
       print("Status koneksi loginUser == 200");
-      final json = jsonDecode(response.body);      
-      ResponseUserLogin responseUserLogin = ResponseUserLogin.fromJson(json);      
-      print(responseUserLogin.status);
-      return responseUserLogin;
+      
+      final json = jsonDecode(response.body);
+
+      // print(json['status']);
+      if (json['status'] == true) {
+        ResponseUserLogin responseUserLogin = ResponseUserLogin.fromJson(json);      
+        return responseUserLogin;
+      } else {
+
+      }
+
     } else {
       print('data tidak ditemukan');
       return null;
     }
+
+  }
+
+  Future<String> login(String username, String password) async {
+    Map data = {
+      'mhs_id': username,
+      'password': password,
+    };
+
+    String bodyJson = json.encode(data) ;
+    final response = await http.post('$_userURI/login', body: bodyJson);
+    
+    String result = "";
+
+    if(response.statusCode == 200) {
+      print("Status koneksi loginUser == 200");
+      
+      final json = jsonDecode(response.body);
+
+      print(json['status']);
+      if (json['status'] == true) {
+        ResponseUserLogin responseUserLogin = ResponseUserLogin.fromJson(json);      
+        print(responseUserLogin);
+        result = responseUserLogin.data.mhsId;
+      } else {
+        result = "404";
+      }
+
+      return result;
+
+    } else {
+      print('status koneksi gagal!');
+      return null;
+    }
+
+  }
+
+
+  Future<String> register(String idMhs, String password, String confirmPassword, String tglLahir) async {
+    
+    print(idMhs);
+    print(password);
+    print(confirmPassword);
+    print(tglLahir);
+
+
+    if (password != confirmPassword) {
+      return "PasswordNotSame!";
+    } else {
+
+      Map data = {
+        "mhs_id" : idMhs,
+        "password": password,
+        "tanggal_lahir": tglLahir  
+      };  
+
+      // Map data = {
+      //     "mhs_id" : "0916040030",
+      //     "password": "halodunia123",
+      //     "tanggal_lahir": "1998-04-14T00:00:00Z",
+      // };
+
+      String bodyJson = json.encode(data);
+      final response = await http.post('$_userURI/register', body: bodyJson);
+      
+      if (response.statusCode == 200) {
+        
+        final json = jsonDecode(response.body);
+        print(json);
+
+        ResponseRegister responseRegister = ResponseRegister.fromJson(json);
+
+        if (responseRegister.data.active == 1) {
+          // maka berhasil register
+          return "Akun berhasil diaktivasi!";
+        } else {
+          // maka gagal register
+          return "Akun tidak ditemukan!";
+        }
+      } else {
+        return null;
+      }
+    }
+  } 
+
+
+  // fungsi untuk cek user ada atau tidak
+  Future<String> cekUser(String idMhs) async {
+    final response = await http.get('$_userURI/view/$idMhs');
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      print(json);
+
+      // memakai register kelas karena strukturnya sama
+      ResponseRegister responseCekUser = ResponseRegister.fromJson(json);
+      if (responseCekUser.status == false) {
+        return "false";
+      } else {
+        return responseCekUser.data.nama;
+      }     
+    } else {
+      return "koneksi gagal!";
+    }
+
   }
 
   // Fungsi untuk melihat daftar buku yang sedang dipinjam
@@ -223,7 +336,7 @@ class ApiService {
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
       // print('json: ');
-      print(json);
+      // print(json);
 
       ResponsePeminjamanOnGoing responsePost = ResponsePeminjamanOnGoing.fromJson(json);
 
@@ -231,6 +344,8 @@ class ApiService {
         records.add(value);
       });
 
+      print("Panjang records: ");
+      print(records.length);
       return records;      
     } else {
       return [];
@@ -307,7 +422,7 @@ class ApiService {
 
     if(response.statusCode == 200) {
       final json = jsonDecode(response.body);
-      print(json);
+      // print(json);
       ResponseKategori responseKategori = ResponseKategori.fromJson(json);
       // ResponsePost responsePost = ResponsePost.fromJson(json);
       responseKategori.data.records.forEach((value){

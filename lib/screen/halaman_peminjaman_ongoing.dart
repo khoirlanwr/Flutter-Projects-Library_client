@@ -104,9 +104,13 @@ class _HalamanPeminjamanOnGoingState extends State<HalamanPeminjamanOnGoing> {
               // siapkan variable penampung
               List<RecordOnGoing> listPeminjamanOnGoing = [];
 
-              // assign hasil future query ke list records
-              listPeminjamanOnGoing = snapshot.data;
-              // print(listPeminjamanOnGoing.length);
+              if (snapshot.data == null) {
+                
+              } else {
+                // assign hasil future query ke list records
+                listPeminjamanOnGoing = snapshot.data;
+              }
+              print(listPeminjamanOnGoing.length);
 
               return ListView.builder(
                 itemCount: listPeminjamanOnGoing?.length ?? 0,
