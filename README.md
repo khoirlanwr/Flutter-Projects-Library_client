@@ -1,4 +1,4 @@
-# library_client
+# Flutter Library Mobile Apps
 
 A new Flutter project.
 
